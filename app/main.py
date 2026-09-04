@@ -1,8 +1,13 @@
 import calendar
+import os
+import secrets
 from datetime import date, timedelta
 
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request
+from starlette.responses import Response
 from pydantic import BaseModel
 
 from .db import get_conn, init_db
@@ -10,6 +15,34 @@ from .db import get_conn, init_db
 app = FastAPI(title="Contador de Gastos")
 
 init_db()
+
+AUTH_USER = os.environ.get("AUTH_USER", "admin")
+AUTH_PASSWORD = os.environ.get("AUTH_PASSWORD", "admin")
+
+
+class BasicAuthMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        auth = request.headers.get("Authorization")
+        if auth and auth.startswith("Basic "):
+            import base64
+
+            try:
+                decoded = base64.b64decode(auth[6:]).decode("utf-8")
+                user, _, password = decoded.partition(":")
+            except Exception:
+                user, password = "", ""
+            if secrets.compare_digest(user, AUTH_USER) and secrets.compare_digest(
+                password, AUTH_PASSWORD
+            ):
+                return await call_next(request)
+
+        return Response(
+            status_code=401,
+            headers={"WWW-Authenticate": 'Basic realm="Contador de Gastos"'},
+        )
+
+
+app.add_middleware(BasicAuthMiddleware)
 
 WEEKDAY_LABELS = [
     "Domingo",

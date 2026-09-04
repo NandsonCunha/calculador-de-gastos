@@ -1,9 +1,12 @@
 services:
   contador:
     build: .
+    restart: unless-stopped
     ports:
       - "8001:8000"
     environment:
       - TZ=America/Sao_Paulo
+      - AUTH_USER=${AUTH_USER:-admin}
+      - AUTH_PASSWORD=${AUTH_PASSWORD:?defina AUTH_PASSWORD no .env}
     volumes:
       - ./app/data:/code/app/data
