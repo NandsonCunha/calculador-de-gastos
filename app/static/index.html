@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Contador de Gastos</title>
+<link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header>
+    <h1>Meus Gastos</h1>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
+    <button class="tab-btn" data-tab="semana">Semana</button>
+    <button class="tab-btn" data-tab="mes">Mês</button>
+  </nav>
+
+  <main>
+    <section id="tab-dashboard" class="tab-content active">
+      <div class="cards-row">
+        <div class="summary-card">
+          <span class="label">Esta semana</span>
+          <span class="value" id="dash-semana">R$ 0,00</span>
+        </div>
+        <div class="summary-card">
+          <span class="label">Este mês</span>
+          <span class="value" id="dash-mes">R$ 0,00</span>
+        </div>
+        <div class="summary-card">
+          <span class="label">Média por dia (mês)</span>
+          <span class="value" id="dash-media">R$ 0,00</span>
+        </div>
+        <div class="summary-card">
+          <span class="label">Vs. mês anterior</span>
+          <span class="value" id="dash-variacao">—</span>
+        </div>
+        <div class="summary-card projecao">
+          <span class="label">Previsão do mês</span>
+          <span class="value" id="dash-projecao">R$ 0,00</span>
+        </div>
+      </div>
+
+      <div class="dash-block">
+        <div class="dash-block-head">
+          <h2>Últimos 6 meses</h2>
+          <div class="legend">
+            <span class="legend-item"><i class="dot dot-gasto"></i>Gasto</span>
+            <span class="legend-item"><i class="dot dot-previsto"></i>Previsto</span>
+          </div>
+        </div>
+        <div id="dash-chart" class="bar-chart"></div>
+      </div>
+
+      <div class="dash-block">
+        <h2>Maior gasto do mês</h2>
+        <div id="dash-maior" class="maior-dia"></div>
+      </div>
+    </section>
+
+    <section id="tab-semana" class="tab-content">
+      <div class="week-nav">
+        <button id="week-prev">‹ Anterior</button>
+        <span id="week-range"></span>
+        <button id="week-next">Próxima ›</button>
+      </div>
+      <div id="week-grid" class="week-grid"></div>
+    </section>
+
+    <section id="tab-mes" class="tab-content">
+      <div class="month-nav">
+        <button id="month-prev">‹ Anterior</button>
+        <span id="month-range"></span>
+        <button id="month-next">Próximo ›</button>
+      </div>
+      <div id="month-total" class="month-total"></div>
+      <div id="calendar" class="calendar"></div>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>

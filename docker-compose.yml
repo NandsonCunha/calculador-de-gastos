@@ -1,0 +1,9 @@
+services:
+  contador:
+    build: .
+    ports:
+      - "8001:8000"
+    environment:
+      - TZ=America/Sao_Paulo
+    volumes:
+      - ./app/data:/code/app/data
