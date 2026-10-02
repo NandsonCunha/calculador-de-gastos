@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "Meus Gastos",
+    "slug": "contador-gastos",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "icon": "./assets/icon.png",
+    "splash": {
+      "backgroundColor": "#011627"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.nandson.contadorgastos"
+    },
+    "android": {
+      "package": "com.nandson.contadorgastos",
+      "versionCode": 7,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#011627"
+      }
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-sqlite",
+      "@react-native-community/datetimepicker",
+      "expo-sharing"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "57ecc82a-861a-4666-a548-9f39f3979103"
+      }
+    },
+    "owner": "nandsoncunha",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/57ecc82a-861a-4666-a548-9f39f3979103"
+    }
+  }
+}

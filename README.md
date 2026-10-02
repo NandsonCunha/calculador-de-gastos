@@ -1,8 +1,17 @@
 # Calculador de Gastos
 
-Aplicação web simples para registrar e acompanhar gastos diários, com visualização por semana, calendário mensal e um dashboard com totais, médias e projeção de gastos do mês.
+Aplicação para registrar e acompanhar gastos diários, com visualização por semana, calendário mensal e um dashboard com totais, médias e projeção de gastos do mês.
 
-## Funcionalidades
+Tem duas versões independentes (bancos de dados separados, não sincronizam entre si):
+
+- **Web** (`app/`) — FastAPI + SQLite, pensada pra rodar num servidor sempre ligado.
+- **Mobile** (`mobile/`) — React Native/Expo, 100% local no celular (sem precisar de servidor). Veja [mobile/README.md](mobile/README.md) pra detalhes, changelog completo e como rodar/buildar.
+
+---
+
+## Versão Web (`app/`)
+
+### Funcionalidades
 
 - Registro de múltiplos lançamentos por dia
 - Visão semanal com navegação entre semanas
@@ -15,15 +24,15 @@ Aplicação web simples para registrar e acompanhar gastos diários, com visuali
   - projeção de gasto para o fim do mês
   - histórico dos últimos 6 meses
 
-## Stack
+### Stack
 
 - **Backend:** FastAPI + SQLite
 - **Frontend:** HTML/CSS/JS estáticos servidos pelo próprio backend
 - **Deploy:** Docker / Docker Compose
 
-## Como rodar
+### Como rodar
 
-### Com Docker Compose
+#### Com Docker Compose
 
 ```bash
 docker compose up --build
@@ -33,7 +42,7 @@ A aplicação fica disponível em `http://localhost:8001`.
 
 Os dados ficam persistidos em `./app/data`.
 
-### Local (sem Docker)
+#### Local (sem Docker)
 
 ```bash
 python -m venv .venv
@@ -44,7 +53,7 @@ uvicorn app.main:app --reload
 
 A aplicação fica disponível em `http://localhost:8000`.
 
-## Estrutura
+### Estrutura
 
 ```
 app/
@@ -56,7 +65,7 @@ docker-compose.yml
 requirements.txt
 ```
 
-## API
+### API
 
 | Método | Rota                | Descrição                              |
 |--------|---------------------|-----------------------------------------|
