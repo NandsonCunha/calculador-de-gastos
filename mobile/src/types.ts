@@ -66,6 +66,7 @@ export type CategoriaFatia = {
 
 export type Dashboard = {
   hoje: string;
+  ehMesAtual: boolean;
   semanaTotal: number;
   mesTotal: number;
   mesAnteriorTotal: number;

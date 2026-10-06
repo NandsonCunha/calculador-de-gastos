@@ -82,3 +82,8 @@ src/
 - **Identidade visual**: ícone próprio do app.
 - **Segurança de distribuição**: removida a importação automática de dados de exemplo — o APK pode ser compartilhado sem vazar dados de quem o gerou.
 - **Recuperação de senha séria**: pergunta secreta trocada por código de recuperação único (`XXXX-XXXX`), gerado na criação da conta e exibido uma única vez.
+- **Dashboard com filtros**: navegação de mês/ano e filtro por categoria no topo do Dashboard — todos os números (totais, gráficos, comparação com salário) se recalculam de acordo.
+- **Editar lançamento**: modal pra editar valor, data e categoria de um lançamento já existente (antes só dava pra apagar e recriar).
+- **Correção de teclado**: modais com campo de texto agora sobem junto com o teclado em vez de ficarem cobertos por ele.
+- **Assinatura não dispara aviso de limite**: lançar uma assinatura não aciona o toast de limite diário ultrapassado.
+- **Tela Eu reorganizada**: virou uma lista de itens (Salário, Limite diário, Código de recuperação, Alterar senha), cada um abrindo seu próprio modal — em vez de inputs todos empilhados na tela.

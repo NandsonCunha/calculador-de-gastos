@@ -6,6 +6,7 @@ import { fmtDateBr, fmtMoney } from "../dateUtils";
 import { useTheme } from "../theme";
 import type { ColorTheme } from "../theme";
 import CategoriaChip from "./CategoriaChip";
+import EditLancamentoModal from "./EditLancamentoModal";
 
 type Lancamento = {
   id: number;
@@ -28,6 +29,7 @@ export default function DayDetailModal({
   const styles = useMemo(() => makeStyles(colors), [colors]);
 
   const [lancamentos, setLancamentos] = useState<Lancamento[]>([]);
+  const [editandoId, setEditandoId] = useState<number | null>(null);
 
   const load = useCallback(async () => {
     if (!data) return;
@@ -64,14 +66,14 @@ export default function DayDetailModal({
 
           {lancamentos.map((l) => (
             <View key={l.id} style={styles.row}>
-              <View style={styles.rowLeft}>
+              <TouchableOpacity style={styles.rowLeft} onPress={() => setEditandoId(l.id)}>
                 <Text style={styles.valor}>
                   {l.assinatura_id ? "🔁 " : ""}
                   {l.nome ? `${l.nome} · ` : ""}
                   {fmtMoney(l.valor)}
                 </Text>
                 <CategoriaChip categoria={l.categoria} onChange={(nova) => alterarCategoria(l.id, nova)} />
-              </View>
+              </TouchableOpacity>
               <TouchableOpacity onPress={() => remover(l.id)}>
                 <Text style={styles.del}>×</Text>
               </TouchableOpacity>
@@ -83,6 +85,15 @@ export default function DayDetailModal({
           </TouchableOpacity>
         </Pressable>
       </Pressable>
+
+      <EditLancamentoModal
+        gastoId={editandoId}
+        onClose={() => setEditandoId(null)}
+        onSaved={() => {
+          load();
+          onChanged();
+        }}
+      />
     </Modal>
   );
 }

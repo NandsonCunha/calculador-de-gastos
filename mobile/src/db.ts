@@ -261,17 +261,19 @@ async function getEntries(dateFrom: string, dateTo: string, filtro?: FiltroBusca
 
 async function getTotaisPorCategoria(
   dateFrom: string,
-  dateTo: string
+  dateTo: string,
+  filtro?: FiltroBusca
 ): Promise<{ categoria: string; total: number; cor: string }[]> {
   const db = await getDb();
+  const { sql, params } = clausulaFiltro(filtro);
   const rows = await db.getAllAsync<{ categoria: string; total: number; cor: string | null }>(
     `SELECT g.categoria as categoria, SUM(g.valor) as total, c.cor as cor
      FROM gastos g
      LEFT JOIN categorias c ON c.nome = g.categoria
-     WHERE g.data BETWEEN ? AND ?
+     WHERE g.data BETWEEN ? AND ?${sql}
      GROUP BY g.categoria
      ORDER BY total DESC`,
-    [dateFrom, dateTo]
+    [dateFrom, dateTo, ...params]
   );
   return rows.map((r) => ({ categoria: r.categoria, total: r.total, cor: r.cor ?? COR_SEM_CATEGORIA }));
 }
@@ -308,6 +310,48 @@ export async function deleteGasto(id: number): Promise<void> {
 export async function updateCategoria(id: number, categoria: string): Promise<void> {
   const db = await getDb();
   await db.runAsync("UPDATE gastos SET categoria = ? WHERE id = ?", [categoria, id]);
+}
+
+export async function getGasto(id: number): Promise<{
+  id: number;
+  data: string;
+  valor: number;
+  categoria: string;
+  nome: string | null;
+  assinaturaId: number | null;
+} | null> {
+  const db = await getDb();
+  const row = await db.getFirstAsync<{
+    id: number;
+    data: string;
+    valor: number;
+    categoria: string;
+    nome: string | null;
+    assinatura_id: number | null;
+  }>("SELECT id, data, valor, categoria, nome, assinatura_id FROM gastos WHERE id = ?", [id]);
+  if (!row) return null;
+  return {
+    id: row.id,
+    data: row.data,
+    valor: row.valor,
+    categoria: row.categoria,
+    nome: row.nome,
+    assinaturaId: row.assinatura_id,
+  };
+}
+
+export async function editarLancamento(
+  id: number,
+  dados: { valor: number; categoria: string; data: string }
+): Promise<void> {
+  if (dados.valor <= 0) throw new Error("Valor deve ser maior que zero");
+  const db = await getDb();
+  await db.runAsync("UPDATE gastos SET valor = ?, categoria = ?, data = ? WHERE id = ?", [
+    dados.valor,
+    dados.categoria,
+    dados.data,
+    id,
+  ]);
 }
 
 export async function getEntriesForDay(data: string): Promise<
@@ -412,44 +456,55 @@ export async function getMonth(year: number, month: number, filtro?: FiltroBusca
   };
 }
 
-export async function getDashboard(): Promise<Dashboard> {
+export async function getDashboard(
+  ano?: number,
+  mes?: number,
+  categoria?: string
+): Promise<Dashboard> {
   const today = new Date();
+  const selYear = ano ?? today.getFullYear();
+  const selMonth = mes ?? today.getMonth() + 1;
+  const ehMesAtual = selYear === today.getFullYear() && selMonth === today.getMonth() + 1;
+  const filtro: FiltroBusca | undefined = categoria ? { categoria } : undefined;
 
-  const start = weekStart(today);
-  const weekTotal = await sumRange(toIso(start), toIso(addDays(start, 6)));
+  let weekTotal = 0;
+  if (ehMesAtual) {
+    const start = weekStart(today);
+    weekTotal = await sumRange(toIso(start), toIso(addDays(start, 6)), filtro);
+  }
 
-  const [firstDay, lastDay] = monthBounds(today.getFullYear(), today.getMonth() + 1);
-  const monthTotal = await sumRange(toIso(firstDay), toIso(lastDay));
+  const [firstDay, lastDay] = monthBounds(selYear, selMonth);
+  const monthTotal = await sumRange(toIso(firstDay), toIso(lastDay), filtro);
 
-  const daysElapsed = Math.round((today.getTime() - firstDay.getTime()) / 86400000) + 1;
+  const diasNoMes = Math.round((lastDay.getTime() - firstDay.getTime()) / 86400000) + 1;
+  const daysElapsed = ehMesAtual
+    ? Math.round((today.getTime() - firstDay.getTime()) / 86400000) + 1
+    : diasNoMes;
   const avgPerDay = daysElapsed > 0 ? monthTotal / daysElapsed : 0;
 
   const meses: Dashboard["meses"] = [];
-  let y = today.getFullYear();
-  let m = today.getMonth() + 1;
   for (let i = 5; i >= 0; i--) {
-    let mm = m - i;
-    let yy = y;
+    let mm = selMonth - i;
+    let yy = selYear;
     while (mm < 1) {
       mm += 12;
       yy -= 1;
     }
     const [f, l] = monthBounds(yy, mm);
-    const total = await sumRange(toIso(f), toIso(l));
+    const total = await sumRange(toIso(f), toIso(l), filtro);
     meses.push({ year: yy, month: mm, label: MONTH_NAMES[mm - 1].slice(0, 3), total, projetado: 0 });
   }
 
-  const diasNoMes = Math.round((lastDay.getTime() - firstDay.getTime()) / 86400000) + 1;
-  const diasRestantes = Math.max(diasNoMes - daysElapsed, 0);
-  const projecaoResto = avgPerDay * diasRestantes;
-  const projecaoMes = monthTotal + projecaoResto;
-  meses[meses.length - 1].projetado = projecaoResto;
+  const diasRestantes = ehMesAtual ? Math.max(diasNoMes - daysElapsed, 0) : 0;
+  const projecaoResto = ehMesAtual ? avgPerDay * diasRestantes : 0;
+  const projecaoMes = ehMesAtual ? monthTotal + projecaoResto : monthTotal;
+  if (ehMesAtual) meses[meses.length - 1].projetado = projecaoResto;
 
   const mesAtualTotal = meses[meses.length - 1].total;
   const mesAnteriorTotal = meses.length > 1 ? meses[meses.length - 2].total : 0;
   const variacaoPct = mesAnteriorTotal > 0 ? ((mesAtualTotal - mesAnteriorTotal) / mesAnteriorTotal) * 100 : null;
 
-  const totalsMes = await getTotals(toIso(firstDay), toIso(lastDay));
+  const totalsMes = await getTotals(toIso(firstDay), toIso(lastDay), filtro);
   let maiorDia: Dashboard["maiorDia"] = null;
   const entriesArr = Object.entries(totalsMes);
   if (entriesArr.length > 0) {
@@ -457,7 +512,7 @@ export async function getDashboard(): Promise<Dashboard> {
     maiorDia = { data: dataMax, valor: valorMax };
   }
 
-  const categoriasRaw = await getTotaisPorCategoria(toIso(firstDay), toIso(lastDay));
+  const categoriasRaw = await getTotaisPorCategoria(toIso(firstDay), toIso(lastDay), filtro);
   const categorias: Dashboard["categorias"] = categoriasRaw.map((c) => ({
     categoria: c.categoria,
     total: c.total,
@@ -469,6 +524,7 @@ export async function getDashboard(): Promise<Dashboard> {
 
   return {
     hoje: toIso(today),
+    ehMesAtual,
     semanaTotal: weekTotal,
     mesTotal: monthTotal,
     mesAnteriorTotal,

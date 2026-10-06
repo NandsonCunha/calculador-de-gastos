@@ -3,7 +3,9 @@ import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -157,23 +159,28 @@ export default function MaisScreen() {
         animationType="fade"
         onRequestClose={() => setModalCriarAberto(false)}
       >
-        <Pressable style={styles.backdrop} onPress={() => setModalCriarAberto(false)}>
-          <Pressable style={styles.sheet}>
-            <Text style={styles.sheetTitle}>Nova categoria</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Ex: Educação"
-              placeholderTextColor={colors.textDim}
-              value={nomeCategoria}
-              onChangeText={setNomeCategoria}
-              autoFocus
-            />
-            {erroCategoria && <Text style={styles.erro}>{erroCategoria}</Text>}
-            <TouchableOpacity style={styles.confirmBtn} onPress={confirmarCriacao}>
-              <Text style={styles.confirmBtnText}>Confirmar</Text>
-            </TouchableOpacity>
+        <KeyboardAvoidingView
+          style={styles.flex}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
+          <Pressable style={styles.backdrop} onPress={() => setModalCriarAberto(false)}>
+            <Pressable style={styles.sheet}>
+              <Text style={styles.sheetTitle}>Nova categoria</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Ex: Educação"
+                placeholderTextColor={colors.textDim}
+                value={nomeCategoria}
+                onChangeText={setNomeCategoria}
+                autoFocus
+              />
+              {erroCategoria && <Text style={styles.erro}>{erroCategoria}</Text>}
+              <TouchableOpacity style={styles.confirmBtn} onPress={confirmarCriacao}>
+                <Text style={styles.confirmBtnText}>Confirmar</Text>
+              </TouchableOpacity>
+            </Pressable>
           </Pressable>
-        </Pressable>
+        </KeyboardAvoidingView>
       </Modal>
 
       <Modal
@@ -182,22 +189,27 @@ export default function MaisScreen() {
         animationType="fade"
         onRequestClose={() => setCategoriaEditando(null)}
       >
-        <Pressable style={styles.backdrop} onPress={() => setCategoriaEditando(null)}>
-          <Pressable style={styles.sheet}>
-            <Text style={styles.sheetTitle}>Renomear categoria</Text>
-            <TextInput
-              style={styles.input}
-              placeholderTextColor={colors.textDim}
-              value={nomeEdicao}
-              onChangeText={setNomeEdicao}
-              autoFocus
-            />
-            {erroEdicao && <Text style={styles.erro}>{erroEdicao}</Text>}
-            <TouchableOpacity style={styles.confirmBtn} onPress={confirmarEdicao}>
-              <Text style={styles.confirmBtnText}>Salvar</Text>
-            </TouchableOpacity>
+        <KeyboardAvoidingView
+          style={styles.flex}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
+          <Pressable style={styles.backdrop} onPress={() => setCategoriaEditando(null)}>
+            <Pressable style={styles.sheet}>
+              <Text style={styles.sheetTitle}>Renomear categoria</Text>
+              <TextInput
+                style={styles.input}
+                placeholderTextColor={colors.textDim}
+                value={nomeEdicao}
+                onChangeText={setNomeEdicao}
+                autoFocus
+              />
+              {erroEdicao && <Text style={styles.erro}>{erroEdicao}</Text>}
+              <TouchableOpacity style={styles.confirmBtn} onPress={confirmarEdicao}>
+                <Text style={styles.confirmBtnText}>Salvar</Text>
+              </TouchableOpacity>
+            </Pressable>
           </Pressable>
-        </Pressable>
+        </KeyboardAvoidingView>
       </Modal>
     </ScrollView>
   );
@@ -206,6 +218,9 @@ export default function MaisScreen() {
 const makeStyles = (colors: ColorTheme) =>
   StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  flex: {
     flex: 1,
   },
   item: {

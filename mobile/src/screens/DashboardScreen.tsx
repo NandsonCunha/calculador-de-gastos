@@ -1,14 +1,18 @@
+import { Picker } from "@react-native-picker/picker";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Platform, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { cancelarAssinatura, listarAssinaturasAtivas } from "../assinaturas";
 import { COR_SEM_CATEGORIA } from "../categorias";
 import DonutChart from "../components/DonutChart";
 import { getDashboard, listarCategorias } from "../db";
-import { fmtDateBr, fmtMoney } from "../dateUtils";
+import { MONTH_NAMES, fmtDateBr, fmtMoney } from "../dateUtils";
 import { useTheme } from "../theme";
 import type { ColorTheme } from "../theme";
 import type { Assinatura, Dashboard } from "../types";
+
+const TODAS = "__todas__";
+const hoje = new Date();
 
 export default function DashboardScreen({ refreshKey }: { refreshKey: number }) {
   const { colors } = useTheme();
@@ -17,20 +21,45 @@ export default function DashboardScreen({ refreshKey }: { refreshKey: number }) 
   const [data, setData] = useState<Dashboard | null>(null);
   const [assinaturas, setAssinaturas] = useState<Assinatura[]>([]);
   const [coresCategoria, setCoresCategoria] = useState<Record<string, string>>({});
+  const [categoriasLista, setCategoriasLista] = useState<{ nome: string; cor: string }[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
+  const [ano, setAno] = useState(hoje.getFullYear());
+  const [mes, setMes] = useState(hoje.getMonth() + 1);
+  const [categoriaFiltro, setCategoriaFiltro] = useState(TODAS);
+
   const load = useCallback(async () => {
-    const d = await getDashboard();
+    const categoria = categoriaFiltro === TODAS ? undefined : categoriaFiltro;
+    const d = await getDashboard(ano, mes, categoria);
     setData(d);
     const a = await listarAssinaturasAtivas();
     setAssinaturas(a);
     const cs = await listarCategorias();
+    setCategoriasLista(cs);
     setCoresCategoria(Object.fromEntries(cs.map((c) => [c.nome, c.cor])));
-  }, []);
+  }, [ano, mes, categoriaFiltro]);
 
   useEffect(() => {
     load();
   }, [load, refreshKey]);
+
+  const mesAnterior = () => {
+    if (mes === 1) {
+      setMes(12);
+      setAno((a) => a - 1);
+    } else {
+      setMes((m) => m - 1);
+    }
+  };
+
+  const mesSeguinte = () => {
+    if (mes === 12) {
+      setMes(1);
+      setAno((a) => a + 1);
+    } else {
+      setMes((m) => m + 1);
+    }
+  };
 
   const cancelar = async (id: number) => {
     await cancelarAssinatura(id);
@@ -53,9 +82,38 @@ export default function DashboardScreen({ refreshKey }: { refreshKey: number }) 
       contentContainerStyle={{ padding: 20 }}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.accent} />}
     >
+      <View style={styles.filtros}>
+        <View style={styles.mesNav}>
+          <TouchableOpacity onPress={mesAnterior} style={styles.mesNavBtn}>
+            <Text style={styles.mesNavBtnText}>‹</Text>
+          </TouchableOpacity>
+          <Text style={styles.mesNavLabel}>
+            {MONTH_NAMES[mes - 1]} {ano}
+          </Text>
+          <TouchableOpacity onPress={mesSeguinte} style={styles.mesNavBtn}>
+            <Text style={styles.mesNavBtnText}>›</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.pickerWrap}>
+          <Picker
+            selectedValue={categoriaFiltro}
+            onValueChange={setCategoriaFiltro}
+            style={styles.picker}
+            dropdownIconColor={colors.text}
+            mode="dropdown"
+          >
+            <Picker.Item label="Todas as categorias" value={TODAS} color={Platform.OS === "ios" ? colors.text : undefined} />
+            {categoriasLista.map((c) => (
+              <Picker.Item key={c.nome} label={c.nome} value={c.nome} color={Platform.OS === "ios" ? colors.text : undefined} />
+            ))}
+          </Picker>
+        </View>
+      </View>
+
       <View style={styles.cardsRow}>
-        <Card styles={styles} label="Esta semana" value={fmtMoney(data.semanaTotal)} />
-        <Card styles={styles} label="Este mês" value={fmtMoney(data.mesTotal)} />
+        {data.ehMesAtual && <Card styles={styles} label="Esta semana" value={fmtMoney(data.semanaTotal)} />}
+        <Card styles={styles} label={data.ehMesAtual ? "Este mês" : "Total do mês"} value={fmtMoney(data.mesTotal)} />
         <Card styles={styles} label="Média por dia (mês)" value={fmtMoney(data.mediaDia)} />
         <Card
           styles={styles}
@@ -63,7 +121,9 @@ export default function DashboardScreen({ refreshKey }: { refreshKey: number }) 
           value={data.variacaoPct === null ? "—" : `${data.variacaoPct >= 0 ? "+" : ""}${data.variacaoPct.toFixed(1)}%`}
           color={data.variacaoPct === null ? undefined : data.variacaoPct > 0 ? colors.up : colors.down}
         />
-        <Card styles={styles} label="Previsão do mês" value={fmtMoney(data.projecaoMes)} color={colors.previsto} />
+        {data.ehMesAtual && (
+          <Card styles={styles} label="Previsão do mês" value={fmtMoney(data.projecaoMes)} color={colors.previsto} />
+        )}
       </View>
 
       <View style={styles.block}>
@@ -206,6 +266,49 @@ const makeStyles = (colors: ColorTheme) =>
   StyleSheet.create({
   container: {
     flex: 1,
+  },
+  filtros: {
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 16,
+  },
+  mesNav: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+  },
+  mesNavBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: 6,
+  },
+  mesNavBtnText: {
+    color: colors.text,
+    fontSize: 16,
+  },
+  mesNavLabel: {
+    color: colors.text,
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  pickerWrap: {
+    flex: 1,
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 5,
+    overflow: "hidden",
+    justifyContent: "center",
+  },
+  picker: {
+    color: colors.text,
+    height: Platform.OS === "ios" ? undefined : 40,
+    fontSize: 12,
   },
   cardsRow: {
     flexDirection: "row",

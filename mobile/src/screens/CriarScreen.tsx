@@ -42,6 +42,7 @@ export default function CriarScreen({ onChanged }: { onChanged: () => void }) {
     setSalvando(true);
     try {
       const dataIso = toIso(data);
+      const eraAssinatura = assinaturaAtiva;
       if (assinaturaAtiva) {
         await createAssinatura(nomeAssinatura.trim(), valor, categoria, dataIso);
       } else {
@@ -57,7 +58,7 @@ export default function CriarScreen({ onChanged }: { onChanged: () => void }) {
       setSucesso(true);
       setTimeout(() => setSucesso(false), 2000);
 
-      if (dataIso === toIso(new Date())) {
+      if (!eraAssinatura && dataIso === toIso(new Date())) {
         const perfil = await getPerfil();
         if (perfil.limiteDiario > 0) {
           const totalHoje = await getTotalDia(dataIso);

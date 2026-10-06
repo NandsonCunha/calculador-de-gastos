@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import CategoriaChip from "../components/CategoriaChip";
+import EditLancamentoModal from "../components/EditLancamentoModal";
 import { deleteGasto, getWeek, updateCategoria } from "../db";
 import type { FiltroBusca } from "../db";
 import { fmtDateBr, fmtMoney } from "../dateUtils";
@@ -21,6 +22,7 @@ export default function SemanaScreen({
 
   const [offset, setOffset] = useState(0);
   const [data, setData] = useState<SemanaResumo | null>(null);
+  const [editandoId, setEditandoId] = useState<number | null>(null);
 
   const load = useCallback(async () => {
     const d = await getWeek(offset, filtro);
@@ -75,14 +77,14 @@ export default function SemanaScreen({
 
             {dia.lancamentos.map((l) => (
               <View key={l.id} style={styles.entryRow}>
-                <View style={styles.entryLeft}>
+                <TouchableOpacity style={styles.entryLeft} onPress={() => setEditandoId(l.id)}>
                   <Text style={styles.entryValue}>
                     {l.assinaturaId ? "🔁 " : ""}
                     {l.nome ? `${l.nome} · ` : ""}
                     {fmtMoney(l.valor)}
                   </Text>
                   <CategoriaChip categoria={l.categoria} onChange={(nova) => alterarCategoria(l.id, nova)} />
-                </View>
+                </TouchableOpacity>
                 <TouchableOpacity onPress={() => remover(l.id)}>
                   <Text style={styles.entryDel}>×</Text>
                 </TouchableOpacity>
@@ -91,6 +93,15 @@ export default function SemanaScreen({
           </View>
         ))}
       </ScrollView>
+
+      <EditLancamentoModal
+        gastoId={editandoId}
+        onClose={() => setEditandoId(null)}
+        onSaved={() => {
+          load();
+          onChanged();
+        }}
+      />
     </View>
   );
 }
