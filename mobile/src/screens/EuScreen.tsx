@@ -415,7 +415,7 @@ const makeStyles = (colors: ColorTheme) =>
     backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 6,
+    borderRadius: 16,
     paddingHorizontal: 16,
   },
   itemLinha: {
@@ -456,7 +456,7 @@ const makeStyles = (colors: ColorTheme) =>
   },
   sheet: {
     backgroundColor: colors.card,
-    borderRadius: 8,
+    borderRadius: 18,
     padding: 20,
   },
   modalHead: {
@@ -475,7 +475,7 @@ const makeStyles = (colors: ColorTheme) =>
     backgroundColor: colors.bg,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 4,
+    borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 14,
     color: colors.text,
@@ -494,7 +494,7 @@ const makeStyles = (colors: ColorTheme) =>
     backgroundColor: colors.bg,
     borderWidth: 1,
     borderColor: colors.accent,
-    borderRadius: 8,
+    borderRadius: 16,
     paddingVertical: 18,
     alignItems: "center",
     marginBottom: 12,
@@ -509,7 +509,7 @@ const makeStyles = (colors: ColorTheme) =>
     backgroundColor: colors.bg,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 4,
+    borderRadius: 12,
     paddingVertical: 10,
     paddingHorizontal: 12,
     color: colors.text,
@@ -529,7 +529,7 @@ const makeStyles = (colors: ColorTheme) =>
   },
   btn: {
     backgroundColor: colors.accent,
-    borderRadius: 4,
+    borderRadius: 12,
     paddingVertical: 12,
     alignItems: "center",
     marginTop: 4,

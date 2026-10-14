@@ -87,3 +87,5 @@ src/
 - **Correção de teclado**: modais com campo de texto agora sobem junto com o teclado em vez de ficarem cobertos por ele.
 - **Assinatura não dispara aviso de limite**: lançar uma assinatura não aciona o toast de limite diário ultrapassado.
 - **Tela Eu reorganizada**: virou uma lista de itens (Salário, Limite diário, Código de recuperação, Alterar senha), cada um abrindo seu próprio modal — em vez de inputs todos empilhados na tela.
+- **Exportar CSV no Histórico**: além do "exportar tudo" em Mais, dá pra exportar só o que está filtrado (categoria/busca) direto do Histórico.
+- **Redesign visual**: paleta de cores vibrante estilo fintech (azul, verde, vermelho, laranja), card de destaque no Dashboard com o total do mês e variação percentual, gráfico dos últimos 6 meses em formato pílula, barrinhas de progresso por categoria abaixo do gráfico de rosquinha, e cantos bem mais arredondados em todo o app (cards, botões, modais).

@@ -367,17 +367,18 @@ export async function getEntriesForDay(data: string): Promise<
   }>("SELECT id, valor, categoria, nome, assinatura_id FROM gastos WHERE data = ? ORDER BY id", [data]);
 }
 
-export async function getTodosGastos(): Promise<
+export async function getTodosGastos(filtro?: FiltroBusca): Promise<
   { data: string; valor: number; categoria: string; nome: string | null; assinaturaId: number | null }[]
 > {
   const db = await getDb();
+  const { sql, params } = clausulaFiltro(filtro);
   const rows = await db.getAllAsync<{
     data: string;
     valor: number;
     categoria: string;
     nome: string | null;
     assinatura_id: number | null;
-  }>("SELECT data, valor, categoria, nome, assinatura_id FROM gastos ORDER BY data, id");
+  }>(`SELECT data, valor, categoria, nome, assinatura_id FROM gastos WHERE 1=1${sql} ORDER BY data, id`, params);
   return rows.map((r) => ({
     data: r.data,
     valor: r.valor,

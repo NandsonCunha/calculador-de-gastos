@@ -16,36 +16,35 @@ export type ColorTheme = {
   previsto: string;
 };
 
-// paleta inspirada no tema "GitHub Dark" (VS Code)
+// paleta vibrante estilo apps de finanças (fintech)
 export const darkColors: ColorTheme = {
-  bg: "#0d1117",
-  card: "#161b22",
-  cardHover: "#21262d",
-  accent: "#58a6ff",
-  text: "#c9d1d9",
-  textDim: "#8b949e",
-  today: "#1c3a5e",
-  border: "#30363d",
-  up: "#f85149",
-  down: "#3fb950",
-  gasto: "#58a6ff",
-  previsto: "#d29922",
+  bg: "#0a0a0f",
+  card: "#15151c",
+  cardHover: "#1e1e27",
+  accent: "#3b82f6",
+  text: "#f1f1f4",
+  textDim: "#8b8b96",
+  today: "#1c2a4a",
+  border: "#24242e",
+  up: "#ef4444",
+  down: "#22c55e",
+  gasto: "#3b82f6",
+  previsto: "#f59e0b",
 };
 
-// paleta inspirada no tema "GitHub Light" (VS Code)
 export const lightColors: ColorTheme = {
-  bg: "#ffffff",
-  card: "#f6f8fa",
-  cardHover: "#eaeef2",
-  accent: "#0969da",
-  text: "#1f2328",
-  textDim: "#656d76",
-  today: "#ddf4ff",
-  border: "#d0d7de",
-  up: "#cf222e",
-  down: "#1a7f37",
-  gasto: "#0969da",
-  previsto: "#9a6700",
+  bg: "#f5f6f8",
+  card: "#ffffff",
+  cardHover: "#eef0f3",
+  accent: "#3b82f6",
+  text: "#14141a",
+  textDim: "#6b7280",
+  today: "#e8f0fe",
+  border: "#e5e7eb",
+  up: "#ef4444",
+  down: "#16a34a",
+  gasto: "#3b82f6",
+  previsto: "#f59e0b",
 };
 
 // mantido por compatibilidade com imports antigos — sempre reflete o tema escuro

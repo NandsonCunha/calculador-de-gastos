@@ -2,6 +2,7 @@ import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
 
 import { getTodosGastos } from "./db";
+import type { FiltroBusca } from "./db";
 import { fmtDateBr } from "./dateUtils";
 
 function escapeCsv(valor: string): string {
@@ -11,8 +12,11 @@ function escapeCsv(valor: string): string {
   return valor;
 }
 
-export async function exportarCsv(): Promise<void> {
-  const gastos = await getTodosGastos();
+export async function exportarCsv(filtro?: FiltroBusca): Promise<void> {
+  const gastos = await getTodosGastos(filtro);
+  if (gastos.length === 0) {
+    throw new Error("Nenhum lançamento encontrado pra exportar");
+  }
 
   const linhas = [["Data", "Valor", "Categoria", "Nome", "Assinatura"]];
   for (const g of gastos) {

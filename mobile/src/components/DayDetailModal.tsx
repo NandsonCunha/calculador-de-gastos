@@ -136,7 +136,7 @@ const makeStyles = (colors: ColorTheme) =>
     backgroundColor: colors.bg,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 4,
+    borderRadius: 12,
     paddingVertical: 8,
     paddingHorizontal: 10,
     marginBottom: 8,

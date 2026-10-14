@@ -67,7 +67,7 @@ const makeStyles = (colors: ColorTheme) =>
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
-    borderRadius: 10,
+    borderRadius: 14,
     paddingVertical: 3,
     paddingHorizontal: 8,
   },

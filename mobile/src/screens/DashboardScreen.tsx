@@ -103,7 +103,7 @@ export default function DashboardScreen({ refreshKey }: { refreshKey: number }) 
             dropdownIconColor={colors.text}
             mode="dropdown"
           >
-            <Picker.Item label="Todas as categorias" value={TODAS} color={Platform.OS === "ios" ? colors.text : undefined} />
+            <Picker.Item label="Todas" value={TODAS} color={Platform.OS === "ios" ? colors.text : undefined} />
             {categoriasLista.map((c) => (
               <Picker.Item key={c.nome} label={c.nome} value={c.nome} color={Platform.OS === "ios" ? colors.text : undefined} />
             ))}
@@ -111,18 +111,26 @@ export default function DashboardScreen({ refreshKey }: { refreshKey: number }) 
         </View>
       </View>
 
+      <View style={styles.hero}>
+        <View style={styles.heroHead}>
+          <Text style={styles.heroLabel}>{data.ehMesAtual ? "Gasto este mês" : "Total do mês"}</Text>
+          {data.variacaoPct !== null && (
+            <View style={[styles.heroBadge, { backgroundColor: (data.variacaoPct > 0 ? colors.up : colors.down) + "33" }]}>
+              <Text style={[styles.heroBadgeText, { color: data.variacaoPct > 0 ? colors.up : colors.down }]}>
+                {data.variacaoPct >= 0 ? "+" : ""}
+                {data.variacaoPct.toFixed(1)}%
+              </Text>
+            </View>
+          )}
+        </View>
+        <Text style={styles.heroValor}>{fmtMoney(data.mesTotal)}</Text>
+      </View>
+
       <View style={styles.cardsRow}>
         {data.ehMesAtual && <Card styles={styles} label="Esta semana" value={fmtMoney(data.semanaTotal)} />}
-        <Card styles={styles} label={data.ehMesAtual ? "Este mês" : "Total do mês"} value={fmtMoney(data.mesTotal)} />
-        <Card styles={styles} label="Média por dia (mês)" value={fmtMoney(data.mediaDia)} />
-        <Card
-          styles={styles}
-          label="Vs. mês anterior"
-          value={data.variacaoPct === null ? "—" : `${data.variacaoPct >= 0 ? "+" : ""}${data.variacaoPct.toFixed(1)}%`}
-          color={data.variacaoPct === null ? undefined : data.variacaoPct > 0 ? colors.up : colors.down}
-        />
+        <Card styles={styles} label="Média/dia" value={fmtMoney(data.mediaDia)} />
         {data.ehMesAtual && (
-          <Card styles={styles} label="Previsão do mês" value={fmtMoney(data.projecaoMes)} color={colors.previsto} />
+          <Card styles={styles} label="Previsão" value={fmtMoney(data.projecaoMes)} color={colors.previsto} />
         )}
       </View>
 
@@ -159,6 +167,27 @@ export default function DashboardScreen({ refreshKey }: { refreshKey: number }) 
       <View style={styles.block}>
         <Text style={styles.blockTitle}>Gasto por categoria (mês)</Text>
         <DonutChart fatias={data.categorias} total={data.mesTotal} />
+
+        {data.categorias.length > 0 && (
+          <View style={styles.breakdown}>
+            {data.categorias.map((c) => (
+              <View key={c.categoria} style={styles.breakdownRow}>
+                <View style={styles.breakdownHead}>
+                  <View style={styles.breakdownNome}>
+                    <View style={[styles.dot, { backgroundColor: c.cor }]} />
+                    <Text style={styles.breakdownLabel}>{c.categoria}</Text>
+                  </View>
+                  <Text style={styles.breakdownValor}>
+                    {fmtMoney(c.total)} <Text style={styles.dim}>{c.pct.toFixed(0)}%</Text>
+                  </Text>
+                </View>
+                <View style={styles.breakdownBarBg}>
+                  <View style={[styles.breakdownBarFill, { width: `${c.pct}%`, backgroundColor: c.cor }]} />
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
       </View>
 
       <View style={styles.block}>
@@ -280,7 +309,7 @@ const makeStyles = (colors: ColorTheme) =>
     backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 5,
+    borderRadius: 16,
     paddingHorizontal: 10,
   },
   mesNavBtn: {
@@ -301,7 +330,7 @@ const makeStyles = (colors: ColorTheme) =>
     backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 5,
+    borderRadius: 16,
     overflow: "hidden",
     justifyContent: "center",
   },
@@ -309,6 +338,37 @@ const makeStyles = (colors: ColorTheme) =>
     color: colors.text,
     height: Platform.OS === "ios" ? undefined : 40,
     fontSize: 12,
+  },
+  hero: {
+    backgroundColor: colors.accent,
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 16,
+  },
+  heroHead: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  heroLabel: {
+    color: "#ffffffcc",
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  heroBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+  },
+  heroBadgeText: {
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  heroValor: {
+    color: "#fff",
+    fontSize: 34,
+    fontWeight: "800",
   },
   cardsRow: {
     flexDirection: "row",
@@ -318,11 +378,11 @@ const makeStyles = (colors: ColorTheme) =>
   },
   card: {
     backgroundColor: colors.card,
-    borderRadius: 5,
+    borderRadius: 16,
     padding: 14,
     borderWidth: 1,
     borderColor: colors.border,
-    minWidth: "45%",
+    minWidth: "30%",
     flexGrow: 1,
   },
   cardLabel: {
@@ -339,7 +399,7 @@ const makeStyles = (colors: ColorTheme) =>
     backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 6,
+    borderRadius: 20,
     padding: 16,
     marginBottom: 16,
   },
@@ -396,8 +456,8 @@ const makeStyles = (colors: ColorTheme) =>
     alignItems: "center",
   },
   barStack: {
-    width: "60%",
-    borderRadius: 4,
+    width: "55%",
+    borderRadius: 10,
     overflow: "hidden",
     flexDirection: "column-reverse",
   },
@@ -408,6 +468,43 @@ const makeStyles = (colors: ColorTheme) =>
     fontSize: 11,
     color: colors.textDim,
     marginTop: 8,
+  },
+  breakdown: {
+    marginTop: 18,
+    gap: 12,
+  },
+  breakdownRow: {
+    gap: 6,
+  },
+  breakdownHead: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  breakdownNome: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  breakdownLabel: {
+    color: colors.text,
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  breakdownValor: {
+    color: colors.text,
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  breakdownBarBg: {
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.bg,
+    overflow: "hidden",
+  },
+  breakdownBarFill: {
+    height: "100%",
+    borderRadius: 3,
   },
   maiorDia: {
     fontSize: 16,

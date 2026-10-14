@@ -230,7 +230,7 @@ const makeStyles = (colors: ColorTheme) =>
     backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 5,
+    borderRadius: 14,
     paddingVertical: 14,
     paddingHorizontal: 16,
   },
@@ -260,7 +260,7 @@ const makeStyles = (colors: ColorTheme) =>
     backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 5,
+    borderRadius: 14,
     paddingHorizontal: 16,
   },
   categoriaRow: {
@@ -298,7 +298,7 @@ const makeStyles = (colors: ColorTheme) =>
   },
   sheet: {
     backgroundColor: colors.card,
-    borderRadius: 8,
+    borderRadius: 18,
     padding: 20,
   },
   sheetTitle: {
@@ -311,7 +311,7 @@ const makeStyles = (colors: ColorTheme) =>
     backgroundColor: colors.bg,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 4,
+    borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 14,
     color: colors.text,
@@ -320,7 +320,7 @@ const makeStyles = (colors: ColorTheme) =>
   },
   confirmBtn: {
     backgroundColor: colors.accent,
-    borderRadius: 4,
+    borderRadius: 12,
     paddingVertical: 12,
     alignItems: "center",
     marginTop: 4,

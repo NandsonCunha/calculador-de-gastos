@@ -1,9 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import { useEffect, useMemo, useState } from "react";
-import { Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 import { listarCategorias } from "../db";
+import { exportarCsv } from "../exportCsv";
 import { useTheme } from "../theme";
 import type { ColorTheme } from "../theme";
 import type { FiltroBusca } from "../db";
@@ -21,6 +22,8 @@ export default function HistoricoScreen({ onChanged }: { onChanged: () => void }
   const [categorias, setCategorias] = useState<{ nome: string; cor: string }[]>([]);
   const [categoriaFiltro, setCategoriaFiltro] = useState(TODAS);
   const [texto, setTexto] = useState("");
+  const [exportando, setExportando] = useState(false);
+  const [erroExport, setErroExport] = useState<string | null>(null);
 
   useEffect(() => {
     listarCategorias().then(setCategorias);
@@ -29,6 +32,18 @@ export default function HistoricoScreen({ onChanged }: { onChanged: () => void }
   const filtro: FiltroBusca = {
     categoria: categoriaFiltro === TODAS ? undefined : categoriaFiltro,
     texto: texto.trim() || undefined,
+  };
+
+  const exportar = async () => {
+    setErroExport(null);
+    setExportando(true);
+    try {
+      await exportarCsv(filtro);
+    } catch (err: any) {
+      setErroExport(err?.message ?? "Erro ao exportar");
+    } finally {
+      setExportando(false);
+    }
   };
 
   return (
@@ -68,13 +83,23 @@ export default function HistoricoScreen({ onChanged }: { onChanged: () => void }
             dropdownIconColor={colors.text}
             mode="dropdown"
           >
-            <Picker.Item label="Todas as categorias" value={TODAS} color={Platform.OS === "ios" ? colors.text : undefined} />
+            <Picker.Item label="Todas" value={TODAS} color={Platform.OS === "ios" ? colors.text : undefined} />
             {categorias.map((c) => (
               <Picker.Item key={c.nome} label={c.nome} value={c.nome} color={Platform.OS === "ios" ? colors.text : undefined} />
             ))}
           </Picker>
         </View>
+
+        <TouchableOpacity style={styles.exportBtn} onPress={exportar} disabled={exportando}>
+          {exportando ? (
+            <ActivityIndicator size="small" color={colors.accent} />
+          ) : (
+            <Ionicons name="download-outline" size={18} color={colors.accent} />
+          )}
+        </TouchableOpacity>
       </View>
+
+      {erroExport && <Text style={styles.erro}>{erroExport}</Text>}
 
       {modo === "semana" ? (
         <SemanaScreen onChanged={onChanged} filtro={filtro} />
@@ -93,7 +118,7 @@ const makeStyles = (colors: ColorTheme) =>
   switcher: {
     flexDirection: "row",
     backgroundColor: colors.card,
-    borderRadius: 5,
+    borderRadius: 16,
     marginHorizontal: 16,
     marginTop: 16,
     padding: 4,
@@ -103,7 +128,7 @@ const makeStyles = (colors: ColorTheme) =>
   opcao: {
     flex: 1,
     paddingVertical: 8,
-    borderRadius: 4,
+    borderRadius: 12,
     alignItems: "center",
   },
   opcaoAtiva: {
@@ -125,14 +150,14 @@ const makeStyles = (colors: ColorTheme) =>
     marginBottom: 4,
   },
   buscaWrap: {
-    flex: 1,
+    flex: 1.1,
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
     backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 4,
+    borderRadius: 12,
     paddingHorizontal: 10,
   },
   buscaInput: {
@@ -142,11 +167,11 @@ const makeStyles = (colors: ColorTheme) =>
     fontSize: 13,
   },
   pickerWrap: {
-    flex: 1,
+    flex: 0.9,
     backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 4,
+    borderRadius: 12,
     overflow: "hidden",
     justifyContent: "center",
   },
@@ -154,5 +179,23 @@ const makeStyles = (colors: ColorTheme) =>
     color: colors.text,
     height: Platform.OS === "ios" ? undefined : 40,
     fontSize: 12,
+    paddingHorizontal: 4,
+  },
+  exportBtn: {
+    width: 40,
+    height: 40,
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  erro: {
+    color: colors.up,
+    fontSize: 12,
+    marginHorizontal: 16,
+    marginTop: 4,
+    textAlign: "center",
   },
 });
